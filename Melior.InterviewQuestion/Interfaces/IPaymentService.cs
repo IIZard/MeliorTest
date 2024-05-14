@@ -1,6 +1,6 @@
 ﻿using Melior.InterviewQuestion.Types;
 
-namespace Melior.InterviewQuestion.Services
+namespace Melior.InterviewQuestion.Interfaces
 {
     public interface IPaymentService
     {

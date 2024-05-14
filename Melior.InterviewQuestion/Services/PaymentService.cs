@@ -1,14 +1,22 @@
 ﻿using Melior.InterviewQuestion.Data;
+using Melior.InterviewQuestion.Interfaces;
 using Melior.InterviewQuestion.Types;
-using System.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Melior.InterviewQuestion.Services
 {
     public class PaymentService : IPaymentService
     {
+        private readonly IOptions<PaymentServiceOptions> _paymentServiceOptions;
+
+        public PaymentService(IOptions<PaymentServiceOptions> paymentServiceOptions)
+        {
+            _paymentServiceOptions = paymentServiceOptions ?? throw new System.ArgumentNullException(nameof(paymentServiceOptions));
+        }
+
         public MakePaymentResult MakePayment(MakePaymentRequest request)
         {
-            var dataStoreType = ConfigurationManager.AppSettings["DataStoreType"];
+            var dataStoreType = _paymentServiceOptions.Value.DataStoreType;
 
             Account account = null;
 
