@@ -1,5 +1,4 @@
-﻿using Melior.InterviewQuestion.Data;
-using Melior.InterviewQuestion.Interfaces;
+﻿using Melior.InterviewQuestion.Interfaces;
 using Melior.InterviewQuestion.Types;
 using Microsoft.Extensions.Options;
 
