@@ -37,6 +37,22 @@ namespace Melior.InterviewQuestion.UnitTests.Tests.Services
         }
 
         [TestCaseSource(nameof(AllPaymentServiceTestData))]
+        public void MakePayment_GetsDebtorAccountNumber(string dataStoreType, PaymentScheme paymentScheme)
+        {
+            var expectedAccountNumber = "1234";
+            var testaccount = new Account { AllowedPaymentSchemes = 0 };
+            _container.GetMock<IOptionsSnapshot<PaymentServiceOptions>>()
+                .SetupGet(m => m.Value).Returns(new PaymentServiceOptions(dataStoreType));
+            _container.GetMock<IAccountDataStore>().Setup(m => m.GetAccount(It.IsAny<string>()))
+                .Returns(testaccount);
+            var request = new MakePaymentRequest { PaymentScheme = paymentScheme, DebtorAccountNumber = expectedAccountNumber };
+
+            var result = _sut.MakePayment(request);
+
+            _container.GetMock<IAccountDataStore>().Verify(m => m.GetAccount(expectedAccountNumber), Times.Once);
+        }
+
+        [TestCaseSource(nameof(AllPaymentServiceTestData))]
         public void MakePayment_WithNoAllowedPaymentScheme_IsNotSuccess(string dataStoreType, PaymentScheme paymentScheme)
         {
             var testaccount = new Account { AllowedPaymentSchemes = 0 };
