@@ -8,28 +8,26 @@ namespace Melior.InterviewQuestion.Services
     public class PaymentService : IPaymentService
     {
         private readonly IOptionsSnapshot<PaymentServiceOptions> _paymentServiceOptions;
+        private readonly IAccountDataStore _liveAccountDataStore;
+        private readonly IAccountDataStore _backupAccountDataStore;
 
-        public PaymentService(IOptionsSnapshot<PaymentServiceOptions> paymentServiceOptions)
+        private const string BackupDataStoreName = "Backup";
+
+        public PaymentService(IOptionsSnapshot<PaymentServiceOptions> paymentServiceOptions,
+            IAccountDataStore liveAccountDataStore,
+            IAccountDataStore backupAccountDataStore)
         {
             _paymentServiceOptions = paymentServiceOptions ?? throw new System.ArgumentNullException(nameof(paymentServiceOptions));
+            _liveAccountDataStore = liveAccountDataStore ?? throw new System.ArgumentNullException(nameof(liveAccountDataStore));
+            _backupAccountDataStore = backupAccountDataStore ?? throw new System.ArgumentNullException(nameof(backupAccountDataStore));
         }
 
         public MakePaymentResult MakePayment(MakePaymentRequest request)
         {
             var dataStoreType = _paymentServiceOptions.Value.DataStoreType;
 
-            Account account = null;
-
-            if (dataStoreType == "Backup")
-            {
-                var accountDataStore = new BackupAccountDataStore();
-                account = accountDataStore.GetAccount(request.DebtorAccountNumber);
-            }
-            else
-            {
-                var accountDataStore = new AccountDataStore();
-                account = accountDataStore.GetAccount(request.DebtorAccountNumber);
-            }
+            var account = RequestedDataStoreTypeIsBackup(dataStoreType) ?
+                _backupAccountDataStore.GetAccount(request.DebtorAccountNumber) : _liveAccountDataStore.GetAccount(request.DebtorAccountNumber);
 
             var result = new MakePaymentResult();
 
@@ -81,19 +79,19 @@ namespace Melior.InterviewQuestion.Services
             {
                 account.Balance -= request.Amount;
 
-                if (dataStoreType == "Backup")
+                if (RequestedDataStoreTypeIsBackup(dataStoreType))
                 {
-                    var accountDataStore = new BackupAccountDataStore();
-                    accountDataStore.UpdateAccount(account);
+                    _backupAccountDataStore.UpdateAccount(account);
                 }
                 else
                 {
-                    var accountDataStore = new AccountDataStore();
-                    accountDataStore.UpdateAccount(account);
+                    _liveAccountDataStore.UpdateAccount(account);
                 }
             }
 
             return result;
         }
+
+        private static bool RequestedDataStoreTypeIsBackup(string dataStoreType) => string.Equals(dataStoreType, BackupDataStoreName, System.StringComparison.InvariantCultureIgnoreCase);
     }
 }
