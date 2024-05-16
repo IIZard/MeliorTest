@@ -77,7 +77,7 @@ namespace Melior.InterviewQuestion.Services
 
             if (result.Success)
             {
-                account.Balance -= request.Amount;
+                account.Balance -= request.Amount; // race condition
 
                 if (RequestedDataStoreTypeIsBackup(dataStoreType))
                 {
