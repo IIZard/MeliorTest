@@ -82,7 +82,25 @@ namespace Melior.InterviewQuestion.UnitTests.Tests.Services
             Assert.That(result.Success, Is.False);
         }
 
+        [TestCaseSource(nameof(AllPaymentServiceTestData))]
+        public void MakePayment_WithCorrectSettings_IsSuccess(string dataStoreType, PaymentScheme paymentScheme)
+        {
+            var testbalance = 1000;
+            var testaccount = new Account { 
+                AllowedPaymentSchemes = AllowedPaymentSchemes.Bacs | AllowedPaymentSchemes.FasterPayments | AllowedPaymentSchemes.Chaps, 
+                Balance = testbalance * 2,
+                Status = AccountStatus.Live
+            };
+            _container.GetMock<IOptionsSnapshot<PaymentServiceOptions>>()
+                .SetupGet(m => m.Value).Returns(new PaymentServiceOptions(dataStoreType));
+            _container.GetMock<IAccountDataStore>().Setup(m => m.GetAccount(It.IsAny<string>()))
+                .Returns(testaccount);
+            var request = new MakePaymentRequest { PaymentScheme = paymentScheme, Amount = testbalance };
 
+            var result = _sut.MakePayment(request);
+
+            Assert.That(result.Success, Is.True);
+        }
 
         public static IEnumerable<TestCaseData> AllPaymentServiceTestData()
         {

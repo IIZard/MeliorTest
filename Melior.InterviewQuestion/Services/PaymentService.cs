@@ -29,7 +29,7 @@ namespace Melior.InterviewQuestion.Services
             var account = RequestedDataStoreTypeIsBackup(dataStoreType) ?
                 _backupAccountDataStore.GetAccount(request.DebtorAccountNumber) : _liveAccountDataStore.GetAccount(request.DebtorAccountNumber);
 
-            var result = new MakePaymentResult();
+            var result = new MakePaymentResult { Success = true };
 
             switch (request.PaymentScheme)
             {
