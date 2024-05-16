@@ -7,9 +7,9 @@ namespace Melior.InterviewQuestion.Services
 {
     public class PaymentService : IPaymentService
     {
-        private readonly IOptions<PaymentServiceOptions> _paymentServiceOptions;
+        private readonly IOptionsSnapshot<PaymentServiceOptions> _paymentServiceOptions;
 
-        public PaymentService(IOptions<PaymentServiceOptions> paymentServiceOptions)
+        public PaymentService(IOptionsSnapshot<PaymentServiceOptions> paymentServiceOptions)
         {
             _paymentServiceOptions = paymentServiceOptions ?? throw new System.ArgumentNullException(nameof(paymentServiceOptions));
         }
