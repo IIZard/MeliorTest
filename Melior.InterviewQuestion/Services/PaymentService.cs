@@ -29,70 +29,59 @@ namespace Melior.InterviewQuestion.Services
             var account = RequestedDataStoreTypeIsBackup(dataStoreType) ?
                 _backupAccountDataStore.GetAccount(request.DebtorAccountNumber) : _liveAccountDataStore.GetAccount(request.DebtorAccountNumber);
 
-            var result = new MakePaymentResult { Success = true };
+            if (account is null)
+                return FailureResult;
 
             switch (request.PaymentScheme)
             {
                 case PaymentScheme.Bacs:
-                    if (account == null)
+                    if (!account.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.Bacs))
                     {
-                        result.Success = false;
-                    }
-                    else if (!account.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.Bacs))
-                    {
-                        result.Success = false;
+                        return FailureResult;
                     }
                     break;
 
                 case PaymentScheme.FasterPayments:
-                    if (account == null)
+                    if (!account.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.FasterPayments))
                     {
-                        result.Success = false;
-                    }
-                    else if (!account.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.FasterPayments))
-                    {
-                        result.Success = false;
+                        return FailureResult;
                     }
                     else if (account.Balance < request.Amount)
                     {
-                        result.Success = false;
+                        return FailureResult;
                     }
                     break;
 
                 case PaymentScheme.Chaps:
-                    if (account == null)
+                    if (!account.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.Chaps))
                     {
-                        result.Success = false;
-                    }
-                    else if (!account.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.Chaps))
-                    {
-                        result.Success = false;
+                        return FailureResult;
                     }
                     else if (account.Status != AccountStatus.Live)
                     {
-                        result.Success = false;
+                        return FailureResult;
                     }
                     break;
             }
 
-            if (result.Success)
-            {
-                account.Balance -= request.Amount; // race condition
+            account.Balance -= request.Amount; // race condition
 
-                if (RequestedDataStoreTypeIsBackup(dataStoreType))
-                {
-                    _backupAccountDataStore.UpdateAccount(account);
-                }
-                else
-                {
-                    _liveAccountDataStore.UpdateAccount(account);
-                }
+            if (RequestedDataStoreTypeIsBackup(dataStoreType))
+            {
+                _backupAccountDataStore.UpdateAccount(account);
+            }
+            else
+            {
+                _liveAccountDataStore.UpdateAccount(account);
             }
 
-            return result;
+            return SuccessResult;
         }
 
         private static bool RequestedDataStoreTypeIsBackup(string dataStoreType) => 
             string.Equals(dataStoreType, BackupDataStoreName, System.StringComparison.InvariantCultureIgnoreCase);
+
+        private readonly MakePaymentResult FailureResult = new MakePaymentResult { Success = false };
+        private readonly MakePaymentResult SuccessResult = new MakePaymentResult { Success = true };
     }
 }
