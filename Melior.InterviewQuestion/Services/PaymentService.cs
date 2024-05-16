@@ -92,6 +92,7 @@ namespace Melior.InterviewQuestion.Services
             return result;
         }
 
-        private static bool RequestedDataStoreTypeIsBackup(string dataStoreType) => string.Equals(dataStoreType, BackupDataStoreName, System.StringComparison.InvariantCultureIgnoreCase);
+        private static bool RequestedDataStoreTypeIsBackup(string dataStoreType) => 
+            string.Equals(dataStoreType, BackupDataStoreName, System.StringComparison.InvariantCultureIgnoreCase);
     }
 }
