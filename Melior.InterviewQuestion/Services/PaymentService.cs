@@ -1,32 +1,20 @@
 ﻿using Melior.InterviewQuestion.Interfaces;
 using Melior.InterviewQuestion.Types;
-using Microsoft.Extensions.Options;
 
 namespace Melior.InterviewQuestion.Services
 {
     public class PaymentService : IPaymentService
     {
-        private readonly IOptionsSnapshot<PaymentServiceOptions> _paymentServiceOptions;
-        private readonly IAccountDataStore _liveAccountDataStore;
-        private readonly IAccountDataStore _backupAccountDataStore;
+        private readonly IAccountDataStore _accountDataStore;
 
-        private const string BackupDataStoreName = "Backup";
-
-        public PaymentService(IOptionsSnapshot<PaymentServiceOptions> paymentServiceOptions,
-            IAccountDataStore liveAccountDataStore,
-            IAccountDataStore backupAccountDataStore)
+        public PaymentService(IAccountDataStore accountDataStore)
         {
-            _paymentServiceOptions = paymentServiceOptions ?? throw new System.ArgumentNullException(nameof(paymentServiceOptions));
-            _liveAccountDataStore = liveAccountDataStore ?? throw new System.ArgumentNullException(nameof(liveAccountDataStore));
-            _backupAccountDataStore = backupAccountDataStore ?? throw new System.ArgumentNullException(nameof(backupAccountDataStore));
+            _accountDataStore = accountDataStore ?? throw new System.ArgumentNullException(nameof(accountDataStore));
         }
 
         public MakePaymentResult MakePayment(MakePaymentRequest request)
         {
-            var dataStoreType = _paymentServiceOptions.Value.DataStoreType;
-
-            var account = RequestedDataStoreTypeIsBackup(dataStoreType) ?
-                _backupAccountDataStore.GetAccount(request.DebtorAccountNumber) : _liveAccountDataStore.GetAccount(request.DebtorAccountNumber);
+            var account = _accountDataStore.GetAccount(request.DebtorAccountNumber);
 
             if (account is null)
                 return FailureResult;
@@ -65,20 +53,10 @@ namespace Melior.InterviewQuestion.Services
 
             account.Balance -= request.Amount; // race condition
 
-            if (RequestedDataStoreTypeIsBackup(dataStoreType))
-            {
-                _backupAccountDataStore.UpdateAccount(account);
-            }
-            else
-            {
-                _liveAccountDataStore.UpdateAccount(account);
-            }
+            _accountDataStore.UpdateAccount(account);
 
             return SuccessResult;
         }
-
-        private static bool RequestedDataStoreTypeIsBackup(string dataStoreType) => 
-            string.Equals(dataStoreType, BackupDataStoreName, System.StringComparison.InvariantCultureIgnoreCase);
 
         private readonly MakePaymentResult FailureResult = new MakePaymentResult { Success = false };
         private readonly MakePaymentResult SuccessResult = new MakePaymentResult { Success = true };
