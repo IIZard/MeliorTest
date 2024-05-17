@@ -4,7 +4,7 @@ using Melior.InterviewQuestion.Types;
 
 namespace Melior.InterviewQuestion.Validators
 {
-    public class PaymentServiceValidator : AbstractValidator<(Account Account, MakePaymentRequest Request)>
+    public class PaymentServiceValidator : AbstractValidator<PaymentServiceValidatorContext>
     {
         public PaymentServiceValidator()
         {

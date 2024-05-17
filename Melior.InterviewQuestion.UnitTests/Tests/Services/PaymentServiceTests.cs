@@ -1,6 +1,9 @@
-﻿using Melior.InterviewQuestion.Interfaces;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using Melior.InterviewQuestion.Interfaces;
 using Melior.InterviewQuestion.Services;
 using Melior.InterviewQuestion.Types;
+using Melior.InterviewQuestion.Validators;
 using Moq;
 using Moq.AutoMock;
 using NUnit.Framework;
@@ -19,8 +22,8 @@ namespace Melior.InterviewQuestion.UnitTests.Tests.Services
         [SetUp]
         public void SetUp()
         {
-            _container = new AutoMocker(); 
-            _sut = _container.CreateInstance<PaymentService>();
+            _container = new AutoMocker();
+            _sut = new PaymentService(_container.GetMock<IAccountDataStore>().Object, new PaymentServiceValidator());
         }
 
         [TestCaseSource(nameof(AllPaymentServiceTestData))]

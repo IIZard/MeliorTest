@@ -18,7 +18,7 @@ namespace Melior.InterviewQuestion.UnitTests.Tests.Validators
         [Test]
         public void AccountMustNotBeNull()
         {
-            Assert.That(_sut.Validate(((Account)null, new MakePaymentRequest())).IsValid, Is.False);
+            Assert.That(_sut.Validate(new PaymentServiceValidatorContext((Account)null, new MakePaymentRequest())).IsValid, Is.False);
         }
 
         [TestCaseSource(nameof(AccountPaymentSchemeData))]
@@ -26,7 +26,7 @@ namespace Melior.InterviewQuestion.UnitTests.Tests.Validators
         {
             var testacc = new Account { AllowedPaymentSchemes = allowedPaymentSchemes, Status = AccountStatus.Live, Balance = 1000 };
             var testreq = new MakePaymentRequest { PaymentScheme = ps, Amount = 500 };
-            Assert.That(_sut.Validate((testacc, testreq)).IsValid, Is.EqualTo(expectation));
+            Assert.That(_sut.Validate(new PaymentServiceValidatorContext(testacc, testreq)).IsValid, Is.EqualTo(expectation));
         }
 
         [TestCaseSource(nameof(FasterPaymentsMustHaveEnoughBalanceData))]
@@ -34,7 +34,7 @@ namespace Melior.InterviewQuestion.UnitTests.Tests.Validators
         {
             var testacc = new Account { AllowedPaymentSchemes = AllowedPaymentSchemes.FasterPayments, Status = AccountStatus.Live, Balance = balance };
             var testreq = new MakePaymentRequest { PaymentScheme = PaymentScheme.FasterPayments, Amount = request };
-            Assert.That(_sut.Validate((testacc, testreq)).IsValid, Is.EqualTo(expectation));
+            Assert.That(_sut.Validate(new PaymentServiceValidatorContext(testacc, testreq)).IsValid, Is.EqualTo(expectation));
         }
 
         [TestCaseSource(nameof(ChapsMustBeLiveData))]
@@ -42,7 +42,7 @@ namespace Melior.InterviewQuestion.UnitTests.Tests.Validators
         {
             var testacc = new Account { AllowedPaymentSchemes = AllowedPaymentSchemes.Chaps, Status = status };
             var testreq = new MakePaymentRequest { PaymentScheme = PaymentScheme.Chaps };
-            Assert.That(_sut.Validate((testacc, testreq)).IsValid, Is.EqualTo(expectation));
+            Assert.That(_sut.Validate(new PaymentServiceValidatorContext(testacc, testreq)).IsValid, Is.EqualTo(expectation));
         }
 
         public static IEnumerable<TestCaseData> AccountPaymentSchemeData()
