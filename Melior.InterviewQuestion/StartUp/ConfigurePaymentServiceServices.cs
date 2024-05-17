@@ -2,6 +2,7 @@
 using Melior.InterviewQuestion.Interfaces;
 using Melior.InterviewQuestion.Services;
 using Melior.InterviewQuestion.Types;
+using Melior.InterviewQuestion.Validators;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
