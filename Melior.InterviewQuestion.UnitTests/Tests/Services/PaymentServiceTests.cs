@@ -63,27 +63,27 @@ namespace Melior.InterviewQuestion.UnitTests.Tests.Services
             Assert.That(result.Success, Is.False);
         }
 
-        [TestCaseSource(nameof(FasterPaymentsPaymentServiceTestData))]
-        public void MakePayment_FasterPayments_WithLowBalance_IsNotSuccess(PaymentScheme paymentScheme)
+        [Test]
+        public void MakePayment_FasterPayments_WithLowBalance_IsNotSuccess()
         {
             var testbalance = 1000m;
             var testaccount = new Account { AllowedPaymentSchemes = AllowedPaymentSchemes.FasterPayments, Balance = testbalance };
             _container.GetMock<IAccountDataStore>().Setup(m => m.GetAccount(It.IsAny<string>()))
                 .Returns(testaccount);
-            var request = new MakePaymentRequest { PaymentScheme = paymentScheme, Amount = testbalance * 2 };
+            var request = new MakePaymentRequest { PaymentScheme = PaymentScheme.FasterPayments, Amount = testbalance * 2 };
 
             var result = _sut.MakePayment(request);
 
             Assert.That(result.Success, Is.False);
         }
 
-        [TestCaseSource(nameof(ChapsPaymentServiceTestData))]
-        public void MakePayment_Chaps_WithoutLiveStatus_IsNotSuccess(PaymentScheme paymentScheme)
+        [Test]
+        public void MakePayment_Chaps_WithoutLiveStatus_IsNotSuccess()
         {
             var testaccount = new Account { AllowedPaymentSchemes = AllowedPaymentSchemes.Chaps, Status = AccountStatus.Disabled };
             _container.GetMock<IAccountDataStore>().Setup(m => m.GetAccount(It.IsAny<string>()))
                 .Returns(testaccount);
-            var request = new MakePaymentRequest { PaymentScheme = paymentScheme };
+            var request = new MakePaymentRequest { PaymentScheme = PaymentScheme.Chaps };
 
             var result = _sut.MakePayment(request);
 
@@ -131,16 +131,6 @@ namespace Melior.InterviewQuestion.UnitTests.Tests.Services
         {
             yield return new TestCaseData(PaymentScheme.Bacs);
             yield return new TestCaseData(PaymentScheme.FasterPayments);
-            yield return new TestCaseData(PaymentScheme.Chaps);
-        }
-
-        public static IEnumerable<TestCaseData> FasterPaymentsPaymentServiceTestData()
-        {
-            yield return new TestCaseData(PaymentScheme.FasterPayments);
-        }
-
-        public static IEnumerable<TestCaseData> ChapsPaymentServiceTestData()
-        {
             yield return new TestCaseData(PaymentScheme.Chaps);
         }
     }
