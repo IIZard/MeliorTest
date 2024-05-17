@@ -1,5 +1,6 @@
 ﻿using Melior.InterviewQuestion.Interfaces;
 using Melior.InterviewQuestion.Types;
+using System;
 
 namespace Melior.InterviewQuestion.Services
 {
@@ -19,46 +20,51 @@ namespace Melior.InterviewQuestion.Services
         {
             var account = _accountDataStore.GetAccount(request.DebtorAccountNumber);
 
-            if (account is null)
+            if (account is null || !IsValid(request, account))
                 return FailureResult;
-
-            switch (request.PaymentScheme)
-            {
-                case PaymentScheme.Bacs:
-                    if (!account.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.Bacs))
-                    {
-                        return FailureResult;
-                    }
-                    break;
-
-                case PaymentScheme.FasterPayments:
-                    if (!account.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.FasterPayments))
-                    {
-                        return FailureResult;
-                    }
-                    else if (account.Balance < request.Amount)
-                    {
-                        return FailureResult;
-                    }
-                    break;
-
-                case PaymentScheme.Chaps:
-                    if (!account.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.Chaps))
-                    {
-                        return FailureResult;
-                    }
-                    else if (account.Status != AccountStatus.Live)
-                    {
-                        return FailureResult;
-                    }
-                    break;
-            }
 
             account.Balance -= request.Amount; // race condition
 
             _accountDataStore.UpdateAccount(account);
 
             return SuccessResult;
+        }
+
+        private static bool IsValid(MakePaymentRequest request, Account account)
+        {
+            switch (request.PaymentScheme)
+            {
+                case PaymentScheme.Bacs:
+                    if (!account.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.Bacs))
+                    {
+                        return false;
+                    }
+                    break;
+
+                case PaymentScheme.FasterPayments:
+                    if (!account.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.FasterPayments))
+                    {
+                        return false;
+                    }
+                    else if (account.Balance < request.Amount)
+                    {
+                        return false;
+                    }
+                    break;
+
+                case PaymentScheme.Chaps:
+                    if (!account.AllowedPaymentSchemes.HasFlag(AllowedPaymentSchemes.Chaps))
+                    {
+                        return false;
+                    }
+                    else if (account.Status != AccountStatus.Live)
+                    {
+                        return false;
+                    }
+                    break;
+            }
+
+            return true;
         }
     }
 }
