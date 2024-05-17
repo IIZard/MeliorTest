@@ -11,7 +11,6 @@ namespace Melior.InterviewQuestion.StartUp
     public static class ConfigurePaymentServiceServices
     {
         public const string BackupDataStoreName = "Backup";
-        public const string PaymentServiceOptionsConfiguration = nameof(PaymentServiceOptionsConfiguration);
 
         public static void AddPaymentServices(this IServiceCollection services, IConfiguration configuration)
         {

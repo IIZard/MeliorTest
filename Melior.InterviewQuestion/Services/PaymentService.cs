@@ -7,6 +7,9 @@ namespace Melior.InterviewQuestion.Services
     {
         private readonly IAccountDataStore _accountDataStore;
 
+        private static readonly MakePaymentResult FailureResult = new MakePaymentResult { Success = false };
+        private static readonly MakePaymentResult SuccessResult = new MakePaymentResult { Success = true };
+
         public PaymentService(IAccountDataStore accountDataStore)
         {
             _accountDataStore = accountDataStore ?? throw new System.ArgumentNullException(nameof(accountDataStore));
@@ -57,8 +60,5 @@ namespace Melior.InterviewQuestion.Services
 
             return SuccessResult;
         }
-
-        private readonly MakePaymentResult FailureResult = new MakePaymentResult { Success = false };
-        private readonly MakePaymentResult SuccessResult = new MakePaymentResult { Success = true };
     }
 }
