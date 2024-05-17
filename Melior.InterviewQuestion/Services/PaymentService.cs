@@ -1,6 +1,5 @@
 ﻿using Melior.InterviewQuestion.Interfaces;
 using Melior.InterviewQuestion.Types;
-using System;
 
 namespace Melior.InterviewQuestion.Services
 {
