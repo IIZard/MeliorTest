@@ -19,12 +19,13 @@ namespace Melior.InterviewQuestion.StartUp
             services.AddOptions<PaymentServiceOptions>();
             services.AddTransient<AccountDataStore>();
             services.AddTransient<BackupAccountDataStore>();
+            services.AddSingleton<PaymentServiceValidator>();
             services.AddScoped<IPaymentService, PaymentService>(f =>
             {
                 var serviceConfig = f.GetRequiredService<IOptions<PaymentServiceOptions>>();
                 IAccountDataStore requiredDataStore = string.Equals(serviceConfig.Value.DataStoreType, BackupDataStoreName, System.StringComparison.InvariantCultureIgnoreCase) ?
                     f.GetRequiredService<BackupAccountDataStore>() : f.GetRequiredService<AccountDataStore>();
-                return new PaymentService(requiredDataStore);
+                return new PaymentService(requiredDataStore, f.GetRequiredService<PaymentServiceValidator>());
             });
         }
     }
